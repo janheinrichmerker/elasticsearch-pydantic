@@ -27,14 +27,14 @@ tests = [
     "elasticsearch8~=8.12,<8.18.0",
     "elasticsearch8-dsl~=8.12,<8.18.0",
     "elasticsearch~=8.12",
-    "elasticsearch-dsl~=8.12,<8.18.0",
+    "elasticsearch-dsl>=8.12,<9.0",
     "mypy~=1.6",
     "pydantic[email]~=2.11",
     "pytest~=8.0",
     "pytest-cov~=6.3",
     "ruff~=0.9",
 ]
-examples = ["elasticsearch-dsl~=8.12,<8.18.0"]
+examples = ["elasticsearch-dsl>=8.12,<9.0"]
 
 [project.urls]
 "Homepage" = "https://github.com/janheinrichmerker/elasticsearch-pydantic"
