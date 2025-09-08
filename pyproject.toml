@@ -1,0 +1,68 @@
+[project]
+name = "elasticsearch-pydantic"
+authors = [
+    { name = "Jan Heinrich Merker", email = "heinrich.merker@uni-jena.de" },
+]
+description = "Use the Elasticsearch DSL with Pydantic models."
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = ["pydantic~=2.11", "annotated-types~=0.7.0"]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+tests = [
+    "elasticsearch6-dsl~=6.4",
+    "elasticsearch7-dsl~=7.3",
+    "elasticsearch8~=8.12,<8.18.0",
+    "elasticsearch8-dsl~=8.12,<8.18.0",
+    "elasticsearch~=8.12",
+    "elasticsearch-dsl~=8.12,<8.18.0",
+    "mypy~=1.6",
+    "pydantic[email]~=2.11",
+    "pytest~=8.0",
+    "pytest-cov~=6.3",
+    "ruff~=0.9",
+]
+examples = ["elasticsearch-dsl~=8.12,<8.18.0"]
+
+[project.urls]
+"Homepage" = "https://github.com/janheinrichmerker/elasticsearch-pydantic"
+"Bug Tracker" = "https://github.com/janheinrichmerker/elasticsearch-pydantic/issues"
+
+[build-system]
+requires = ["setuptools>=50", "setuptools_scm[toml]>=6.2", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+exclude = ["build", "venv", "examples"]
+
+[tool.setuptools_scm]
+
+[tool.ruff]
+exclude = ["build", "venv"]
+
+[tool.mypy]
+exclude = ["build", "venv"]
+ignore_missing_imports = true
+
+[tool.mypy-elasticsearch_pydantic._compat]
+allow_redefinition = true
+
+[tool.bandit]
+exclude_dirs = ["build", "venv"]
+
+[tool.bandit.assert_used]
+skips = ["**/test_*.py"]
+
+[tool.pytest.ini_options]
+log_cli = true
