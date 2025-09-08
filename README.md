@@ -8,7 +8,7 @@
 [![Downloads](https://img.shields.io/pypi/dm/elasticsearch-pydantic?style=flat-square)](https://pypi.org/project/elasticsearch-pydantic/)
 [![License](https://img.shields.io/github/license/janheinrichmerker/elasticsearch-pydantic?style=flat-square)](LICENSE)
 
-# ☀️ elasticsearch-pydantic
+# 🔍 elasticsearch-pydantic
 
 Use the [Elasticsearch DSL](https://github.com/elastic/elasticsearch-dsl-py) with [Pydantic](https://github.com/pydantic/pydantic) models.
 
