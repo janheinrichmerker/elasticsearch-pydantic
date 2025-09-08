@@ -46,7 +46,6 @@ from pydantic import (
     IPvAnyAddress,
     IPvAnyInterface,
     IPvAnyNetwork,
-    PrivateAttr,
     SecretStr,
     SecretBytes,
     PaymentCardNumber,
@@ -58,9 +57,7 @@ from pydantic import (
     PastDatetime,
     FutureDatetime,
     NameEmail,
-    SkipValidation,
 )
-from pydantic.json_schema import SkipJsonSchema
 from pydantic._internal._model_construction import ModelMetaclass
 from pydantic_core import Url
 
@@ -343,9 +340,6 @@ class BaseInnerDocument(
     validate_assignment=True,
     arbitrary_types_allowed=True,
 ):
-    _meta: Annotated[HitMeta, PrivateAttr(), SkipValidation, SkipJsonSchema]
-    _doc_type: Annotated[DocumentOptions, PrivateAttr(), SkipValidation, SkipJsonSchema]
-
     def __init__(
         self,
         /,
@@ -407,10 +401,6 @@ class BaseDocument(
     validate_assignment=True,
     arbitrary_types_allowed=True,
 ):
-    _meta: Annotated[HitMeta, PrivateAttr(), SkipValidation, SkipJsonSchema]
-    _index: Annotated[Index, PrivateAttr(), SkipValidation, SkipJsonSchema]
-    _doc_type: Annotated[DocumentOptions, PrivateAttr(), SkipValidation, SkipJsonSchema]
-
     def __init__(
         self,
         /,
