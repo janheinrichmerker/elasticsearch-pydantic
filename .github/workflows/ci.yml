@@ -17,7 +17,7 @@ jobs:
       - name: "📥 Check-out"
         uses: actions/checkout@v5
       - name: "🧰 Install Python"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
           cache: pip
@@ -47,7 +47,7 @@ jobs:
       - name: 📥 Check-out
         uses: actions/checkout@v5
       - name: 🧰 Install Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
           cache: pip
@@ -71,7 +71,7 @@ jobs:
       - name: "🧰 Install Protoc"
         run: sudo apt install protobuf-compiler
       - name: "🧰 Install Python"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
           cache: pip
@@ -93,7 +93,7 @@ jobs:
       - name: "📥 Check-out"
         uses: actions/checkout@v5
       - name: "🧰 Install Python"
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
           cache: pip
