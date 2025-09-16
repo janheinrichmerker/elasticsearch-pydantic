@@ -1,4 +1,5 @@
 <!-- markdownlint-disable MD041 -->
+
 [![PyPi](https://img.shields.io/pypi/v/elasticsearch-pydantic?style=flat-square)](https://pypi.org/project/elasticsearch-pydantic/)
 [![CI](https://img.shields.io/github/actions/workflow/status/janheinrichmerker/elasticsearch-pydantic/ci.yml?branch=main&style=flat-square)](https://github.com/janheinrichmerker/elasticsearch-pydantic/actions/workflows/ci.yml)
 [![Code coverage](https://img.shields.io/codecov/c/github/janheinrichmerker/elasticsearch-pydantic?style=flat-square)](https://codecov.io/github/janheinrichmerker/elasticsearch-pydantic/)
@@ -30,21 +31,70 @@ pip install elasticsearch-pydantic
 
 ## Usage
 
-> TODO
+To migrate from Elasticsearch DSL to `elasticsearch-pydantic`, just change your ORM classes to inherit from `elasticsearch_pydantic.BaseDocument` instead of `elasticsearch_dsl.Document`. Then, gradually replace your field definitions with Pydantic type annotations.
 
-### Examples
+For example, in Elasticsearch DSL, you would typically define a document like this:
 
-More examples can be found in the [`examples`](examples/) directory.
+```python
+from elasticsearch_dsl import Document, Text, Date
+
+class BlogPost(Document):
+    title = Text()
+    content = Text()
+    published_at = Date()
+```
+
+With `elasticsearch-pydantic`, you can define the same document using Pydantic models:
+
+```python
+from elasticsearch_pydantic import BaseDocument
+
+class BlogPost(BaseDocument):
+    title: str
+    content: str
+    published_at: datetime
+```
+
+And that's about it!
+You now get all the type-safety and validation benefits of Pydantic, while still being able to use the powerful features of Elasticsearch DSL.
+
+Most Pydantic types are naturally mapped to Elasticsearch field types.
+To learn more about the field type mappings, see the [mapping code](./elasticsearch_pydantic/__init__.py).
+
+### Annotated types
+
+You can use [`Annotated`](https://docs.python.org/3/library/typing.html#typing.Annotated) type hints to customize the Elasticsearch field types:
+
+```python
+from typing import Annotated
+from elasticsearch_dsl import Text, Keyword
+from elasticsearch_pydantic import BaseDocument
+
+class BlogPost(BaseDocument):
+    title: Annotated[str, Text(analyzer="standard")]
+    tags: Annotated[list[str], Keyword]
+```
+
+### Field type aliases
+
+For convenience, `elasticsearch-pydantic` provides type aliases for all standard Elasticsearch field types:
+
+```python
+from elasticsearch_pydantic import BaseDocument, TextField, KeywordField
+
+class BlogPost(BaseDocument):
+    title: TextField
+    tags: list[KeywordField]
+```
 
 ### Compatibility
 
 This library works fine with any of the following Pip packages installed:
 
-- `elasticsearch8`
-- `elasticsearch-dsl`
-- `elasticsearch6-dsl`
-- `elasticsearch7-dsl`
-- `elasticsearch8-dsl`
+- [`elasticsearch-dsl<8.12.0`](https://pypi.org/project/elasticsearch-dsl/)
+- [`elasticsearch6-dsl`](https://pypi.org/project/elasticsearch6-dsl/)
+- [`elasticsearch7-dsl`](https://pypi.org/project/elasticsearch7-dsl/)
+- [`elasticsearch8-dsl<8.12.0`](https://pypi.org/project/elasticsearch8-dsl/)
 
 The `elasticsearch-pydantic` library will automatically detect which Elasticsearch DSL is installed.
 
@@ -63,7 +113,12 @@ pip install build setuptools wheel
 Install package and test dependencies:
 
 ```shell
-pip install -e .[tests]
+pip install -e .[tests,tests-es6]   # For elasticsearch-dsl~=6.0
+pip install -e .[tests,tests-es6x]  # For elasticsearch6-dsl
+pip install -e .[tests,tests-es7]   # For elasticsearch-dsl~=7.0
+pip install -e .[tests,tests-es7x]  # For elasticsearch7-dsl
+pip install -e .[tests,tests-es8]   # For elasticsearch-dsl~=8.0
+pip install -e .[tests,tests-es8x]  # For elasticsearch8-dsl
 ```
 
 ### Testing
