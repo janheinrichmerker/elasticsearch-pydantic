@@ -22,19 +22,20 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 tests = [
-    "elasticsearch6-dsl~=6.4",
-    "elasticsearch7-dsl~=7.3",
-    "elasticsearch8~=8.12,<8.18.0",
-    "elasticsearch8-dsl~=8.12,<8.18.0",
-    "elasticsearch~=8.12",
-    "elasticsearch-dsl~=8.12,<8.18.0",
     "mypy~=1.6",
     "pydantic[email]~=2.11",
     "pytest~=8.0",
     "pytest-cov~=6.3",
     "ruff~=0.9",
 ]
-examples = ["elasticsearch-dsl~=8.12,<8.18.0"]
+tests-es2 = ["elasticsearch-dsl~=2.0"]
+tests-es5 = ["elasticsearch-dsl~=5.0"]
+tests-es6 = ["elasticsearch-dsl~=6.0"]
+tests-es6x = ["elasticsearch6-dsl~=6.0"]
+tests-es7 = ["elasticsearch-dsl~=7.0"]
+tests-es7x = ["elasticsearch7-dsl~=7.0"]
+tests-es8 = ["elasticsearch-dsl~=8.11.0"]
+tests-es8x = ["elasticsearch8-dsl~=8.11.0"]
 
 [project.urls]
 "Homepage" = "https://github.com/janheinrichmerker/elasticsearch-pydantic"
