@@ -10,7 +10,6 @@ from elasticsearch_pydantic._compat import (
     Boolean,
     Byte,
     Completion,
-    ConstantKeyword,
     Date,
     DateRange,
     Double,
@@ -48,10 +47,6 @@ BinaryField: TypeAlias = Annotated[Base64Str, Binary]
 BooleanField: TypeAlias = Annotated[bool, Boolean]
 ByteField: TypeAlias = Annotated[int, Interval(ge=-128, le=127), Byte]
 CompletionField: TypeAlias = Annotated[str, Completion]
-if ConstantKeyword is not NotImplemented:
-    ConstantKeywordField: TypeAlias = Annotated[str, ConstantKeyword]
-else:
-    ConstantKeywordField = NotImplemented  # type: ignore
 DateField: TypeAlias = Annotated[date, Date]
 DatetimeField: TypeAlias = Annotated[datetime, Date]
 DateRangeField: TypeAlias = Annotated[Range[date], DateRange]
