@@ -28,8 +28,6 @@ tests = [
     "pytest-cov~=6.3",
     "ruff~=0.9",
 ]
-tests-es2 = ["elasticsearch-dsl~=2.0"]
-tests-es5 = ["elasticsearch-dsl~=5.0"]
 tests-es6 = ["elasticsearch-dsl~=6.0"]
 tests-es6x = ["elasticsearch6-dsl~=6.0"]
 tests-es7 = ["elasticsearch-dsl~=7.0"]
