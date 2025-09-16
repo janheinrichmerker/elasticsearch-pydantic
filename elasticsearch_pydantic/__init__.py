@@ -10,6 +10,7 @@ from ipaddress import (
     IPv6Network,
 )
 from pathlib import Path
+from types import NoneType
 from typing import (
     Literal,
     Annotated,
@@ -19,7 +20,7 @@ from typing import (
     Union,
     get_args,
     get_origin,
-    Callable,
+    Protocol,
     Pattern,
     Tuple,
     Iterator,
@@ -88,12 +89,16 @@ from elasticsearch_pydantic._compat import (
 )
 
 
-_standard_field_types: dict[Any, Callable[[], Field]] = {
+class _FieldFactory(Protocol):
+    def __call__(self, multi: bool, required: bool) -> Field: ...
+
+
+_standard_field_types: dict[Any, _FieldFactory] = {
     # Python types
     bool: Boolean,
     bytes: Text,
-    date: Date,
-    datetime: Date,
+    date: lambda multi, required: Date(multi=multi, required=required),
+    datetime: lambda multi, required: Date(multi=multi, required=required),
     Decimal: Double,  # Note: This may lose precision.
     Enum: Keyword,
     float: Double,  # Note: Using the widest float type to avoid precision loss.
@@ -112,20 +117,20 @@ _standard_field_types: dict[Any, Callable[[], Field]] = {
     UUID: Keyword,
     # Pydantic types
     AnyUrl: Keyword,
-    AwareDatetime: Date,
+    AwareDatetime: lambda multi, required: Date(multi=multi, required=required),
     Base64Bytes: Binary,
     Base64Str: Binary,
     ByteSize: Long,
     EmailStr: Keyword,
-    FutureDate: Date,
-    FutureDatetime: Date,
+    FutureDate: lambda multi, required: Date(multi=multi, required=required),
+    FutureDatetime: lambda multi, required: Date(multi=multi, required=required),
     IPvAnyAddress: Ip,
     IPvAnyInterface: Ip,
     IPvAnyNetwork: Ip,
-    NaiveDatetime: Date,
+    NaiveDatetime: lambda multi, required: Date(multi=multi, required=required),
     NameEmail: Keyword,
-    PastDate: Date,
-    PastDatetime: Date,
+    PastDate: lambda multi, required: Date(multi=multi, required=required),
+    PastDatetime: lambda multi, required: Date(multi=multi, required=required),
     PaymentCardNumber: Keyword,
     SecretBytes: Keyword,
     SecretStr: Keyword,
@@ -138,22 +143,41 @@ _standard_field_types = {
 }
 
 
+def _is_iterable_type(origin: Any, args: Sequence[Any]) -> bool:
+    # `Tuple`'s where all arguments are the same type (excluding a trailing `...`).
+    if origin is Tuple or origin is tuple:
+        if args[-1] is Ellipsis:
+            return len(args) == 2
+        arg = args[0]
+        return all(a is arg for a in args[1:])
+    # Iterable types (e.g., lists, sets, iterators) with a single argument.
+    if isinstance(origin, type) and hasattr(origin, "__iter__") and len(args) == 1:
+        return True
+    return False
+
+
 def _get_type_hint_field(
     annotation: Any,
+    multi: bool,
+    required: bool,
     metadata: Sequence[Any] = tuple(),
 ) -> Optional[Field]:
     # Map back `Annotated` types.
     if len(metadata) > 0:
-        return _get_type_hint_field(Annotated[annotation, *metadata])
+        return _get_type_hint_field(
+            annotation=Annotated[annotation, *metadata],
+            multi=multi,
+            required=required,
+        )
 
     # Check if any standard type matches directly.
     for standard_type, field_type_factory in _standard_field_types.items():
         if annotation is standard_type:
-            return field_type_factory()
+            return field_type_factory(multi=multi, required=required)
 
     # Wrap `InnerDoc`s as Object field type.
     if isinstance(annotation, type) and issubclass(annotation, InnerDoc):
-        return Object(annotation)
+        return Object(annotation, multi=multi, required=required)
 
     # For the remaining cases, we need to inspect the type origin and arguments.
     origin = get_origin(annotation)
@@ -161,7 +185,7 @@ def _get_type_hint_field(
 
     # Handle `Literals` as keywords.
     if origin is Literal:
-        return Keyword()
+        return Keyword(multi=multi, required=required)
 
     # Handle `Optional` type by unwrapping it.
     if origin is Optional:
@@ -169,15 +193,27 @@ def _get_type_hint_field(
             raise ValueError(
                 f"Expected a single argument for Optional, got {len(args)}."
             )
-        return _get_type_hint_field(args[0])
+        return _get_type_hint_field(
+            annotation=args[0],
+            required=False,
+            multi=multi,
+        )
 
     # Handle `Union` type by common `Field` (if unanimous).
     if origin is Union or origin is UnionType:
-        # Remove `None`'s from the `Union`.
-        # args = [arg for arg in args if arg is not type(None)]
+        # Determine if Union is nullable.
+        required = required and all(arg is not NoneType for arg in args)
 
         # Get the field metadata for each argument.
-        maybe_fields = [_get_type_hint_field(arg) for arg in args if arg is not None]
+        maybe_fields = [
+            _get_type_hint_field(
+                annotation=arg,
+                multi=multi,
+                required=required,
+            )
+            for arg in args
+            if arg is not None
+        ]
 
         # Remove empty field metadata.
         fields = [field for field in maybe_fields if field is not None]
@@ -206,52 +242,51 @@ def _get_type_hint_field(
             if arg is None:
                 continue
             if isinstance(arg, Field):
-                return arg
+                field = arg
+                field._multi = multi
+                field._required = required
+                return field
             if isinstance(arg, type) and issubclass(arg, Field):
-                return arg()
+                return arg(
+                    multi=multi,
+                    required=required,
+                )
 
         # Otherwise, unwrap the first argument.
-        return _get_type_hint_field(args[0])
+        return _get_type_hint_field(
+            annotation=args[0],
+            multi=multi,
+            required=required,
+        )
 
-    # TODO: Should we handle `Sequence[float]` as `DenseVector`?
-    # TODO: Should we handle `Mapping[str, float]` as `SparseVector` or `RankFeatures`?
+    # ADDITION: Should we handle `Sequence[float]` as `DenseVector`?
+    # ADDITION: Should we handle `Mapping[str, float]` as `SparseVector` or `RankFeatures`?
 
-    # Handle `Tuple` type as `Nested` if all arguments are the same `InnerDoc` (if unanimous).
-    if origin is Tuple or origin is tuple:
-        args_no_ellipsis = [arg for arg in args if arg is not Ellipsis]
-        if not all(
-            isinstance(arg, type) and issubclass(arg, InnerDoc)
-            for arg in args_no_ellipsis
-        ):
-            return None
-        elif len(args_no_ellipsis) <= 0:
-            return None
-        elif len(args_no_ellipsis) == 1:
-            return Nested(args_no_ellipsis[0])
-        else:
-            first_field = args_no_ellipsis[0]
-            if any(arg is not first_field for arg in args_no_ellipsis[1:]):
-                raise ValueError(
-                    f"Tuple arguments must be of the same type. Found: {args_no_ellipsis}"
-                )
-            return Nested(first_field)
-
-    # Wrap iterable types (e.g., lists, sets, iterators) as `Nested` if the argument is an `InnerDoc`.
-    if (
-        isinstance(origin, type)
-        and hasattr(origin, "__iter__")
-        and len(args) == 1
-        and isinstance(args[0], type)
-        and issubclass(args[0], InnerDoc)
-    ):
-        return Nested(args[0])
+    # Wrap iterable types (e.g., lists, sets, iterators) ...
+    if _is_iterable_type(origin, args):
+        # ... as `Nested` if the argument is an `InnerDoc`.
+        if isinstance(args[0], type) and issubclass(args[0], InnerDoc):
+            return Nested(
+                args[0],
+                multi=True,
+                required=required,
+            )
+        # ... otherwise as multi-valued field of the argument type.
+        return _get_type_hint_field(
+            annotation=args[0],
+            multi=True,
+            required=required,
+        )
 
     # Check if any superclass matches the standard types.
     if isinstance(annotation, type):
         for base in annotation.__mro__[1:]:
             for standard_type, field_type_factory in _standard_field_types.items():
                 if base is standard_type:
-                    return field_type_factory()
+                    return field_type_factory(
+                        multi=multi,
+                        required=required,
+                    )
 
     return None
 
@@ -285,7 +320,12 @@ class _ModelDocumentMeta(ModelMetaclass, DocumentMeta):
 
         # Register mappings based on type hints.
         for key, field_info in new_cls.model_fields.items():
-            field = _get_type_hint_field(field_info.annotation, field_info.metadata)
+            field = _get_type_hint_field(
+                annotation=field_info.annotation,
+                multi=False,
+                required=field_info.is_required(),
+                metadata=field_info.metadata,
+            )
             if field is not None:
                 mapping.field(key, field)
 
