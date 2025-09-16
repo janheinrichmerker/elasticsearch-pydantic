@@ -51,8 +51,9 @@ from pydantic import (
 from pydantic_core import Url
 from typing_extensions import TypeAlias  # type: ignore[import]
 
-from elasticsearch_pydantic import BaseDocument, BaseInnerDocument
-from elasticsearch_pydantic.field import (
+from elasticsearch_pydantic import (
+    BaseDocument,
+    BaseInnerDocument,
     BinaryField,
     BooleanField,
     ByteField,
@@ -134,9 +135,11 @@ def _assert_mapping_equal(doc1: type[Document], doc2: type[Document]) -> None:
     Assert that the mappings of two `Document` classes are equal.
     This includes checking that each field has the same type and `required` and `multi` settings.
     """
-    assert doc1._doc_type.mapping.to_dict() == doc2._doc_type.mapping.to_dict()
-    properties1 = doc1._doc_type.mapping.properties.properties
-    properties2 = doc2._doc_type.mapping.properties.properties
+    mapping1 = doc1._doc_type.mapping  # type: ignore[attr-defined]
+    mapping2 = doc2._doc_type.mapping  # type: ignore[attr-defined]
+    assert mapping1.to_dict() == mapping2.to_dict()
+    properties1 = mapping1.properties.properties
+    properties2 = mapping2.properties.properties
     assert dir(properties1) == dir(properties2)
     for key in dir(properties1):
         property1: Field = properties1[key]
@@ -392,11 +395,11 @@ def test_mapping_field_type_annotation() -> Any:
         keyword_field = Keyword(required=True, multi=False)
         long_field = Long(required=True, multi=False)
         long_range_field = LongRange(required=True, multi=False)
-        rank_feature_field = RankFeature(required=True, multi=False)
-        rank_features_field = RankFeatures(required=True, multi=False)
-        search_as_you_type_field = SearchAsYouType(required=True, multi=False)
+        rank_feature_field = RankFeature(required=True, multi=False)  # type: ignore
+        rank_features_field = RankFeatures(required=True, multi=False)  # type: ignore
+        search_as_you_type_field = SearchAsYouType(required=True, multi=False)  # type: ignore
         short_field = Short(required=True, multi=False)
-        sparse_vector_field = SparseVector(required=True, multi=False)
+        sparse_vector_field = SparseVector(required=True, multi=False)  # type: ignore
         text_field = Text(required=True, multi=False)
         token_count_field = TokenCount(required=True, multi=False)
 
@@ -462,11 +465,11 @@ def test_mapping_field_type_annotation_multi() -> Any:
         keyword_field = Keyword(required=True, multi=True)
         long_field = Long(required=True, multi=True)
         long_range_field = LongRange(required=True, multi=True)
-        rank_feature_field = RankFeature(required=True, multi=True)
-        rank_features_field = RankFeatures(required=True, multi=True)
-        search_as_you_type_field = SearchAsYouType(required=True, multi=True)
+        rank_feature_field = RankFeature(required=True, multi=True)  # type: ignore
+        rank_features_field = RankFeatures(required=True, multi=True)  # type: ignore
+        search_as_you_type_field = SearchAsYouType(required=True, multi=True)  # type: ignore
         short_field = Short(required=True, multi=True)
-        sparse_vector_field = SparseVector(required=True, multi=True)
+        sparse_vector_field = SparseVector(required=True, multi=True)  # type: ignore
         text_field = Text(required=True, multi=True)
         token_count_field = TokenCount(required=True, multi=True)
 
