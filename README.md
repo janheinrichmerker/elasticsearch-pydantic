@@ -1,5 +1,4 @@
 <!-- markdownlint-disable MD041 -->
-
 [![PyPi](https://img.shields.io/pypi/v/elasticsearch-pydantic?style=flat-square)](https://pypi.org/project/elasticsearch-pydantic/)
 [![CI](https://img.shields.io/github/actions/workflow/status/janheinrichmerker/elasticsearch-pydantic/ci.yml?branch=main&style=flat-square)](https://github.com/janheinrichmerker/elasticsearch-pydantic/actions/workflows/ci.yml)
 [![Code coverage](https://img.shields.io/codecov/c/github/janheinrichmerker/elasticsearch-pydantic?style=flat-square)](https://codecov.io/github/janheinrichmerker/elasticsearch-pydantic/)
