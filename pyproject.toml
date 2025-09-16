@@ -17,7 +17,11 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering",
 ]
-dependencies = ["pydantic~=2.11", "annotated-types~=0.7.0"]
+dependencies = [
+    "annotated-types~=0.7.0",
+    "elastic-transport~=8.0",
+    "pydantic~=2.11",
+]
 dynamic = ["version"]
 
 [project.optional-dependencies]
