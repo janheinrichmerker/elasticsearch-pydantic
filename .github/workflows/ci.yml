@@ -42,6 +42,13 @@ jobs:
           - "3.11"
           - "3.12"
           - "3.13"
+        elasticsearch:
+          - "6"
+          - "6x"
+          - "7"
+          - "7x"
+          - "8"
+          - "8x"
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Check-out
@@ -53,7 +60,7 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
       - name: 🧰 Install dependencies
-        run: pip install .[tests]
+        run: pip install .[tests,tests-es${{ matrix.elasticsearch }}]
       - name: 🔍 Check Python code
         run: ruff check .
   python-typing:
@@ -64,6 +71,13 @@ jobs:
           - "3.11"
           - "3.12"
           - "3.13"
+        elasticsearch:
+          - "6"
+          - "6x"
+          - "7"
+          - "7x"
+          - "8"
+          - "8x"
     runs-on: ubuntu-latest
     steps:
       - name: "📥 Check-out"
@@ -77,7 +91,7 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
       - name: "🧰 Install dependencies"
-        run: pip install .[tests]
+        run: pip install .[tests,tests-es${{ matrix.elasticsearch }}]
       - name: "🔍 Check Python static typing"
         run: mypy .
   python-test:
@@ -88,6 +102,13 @@ jobs:
           - "3.11"
           - "3.12"
           - "3.13"
+        elasticsearch:
+          - "6"
+          - "6x"
+          - "7"
+          - "7x"
+          - "8"
+          - "8x"
     runs-on: ubuntu-latest
     steps:
       - name: "📥 Check-out"
@@ -99,12 +120,12 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
       - name: "🧰 Install dependencies"
-        run: pip install .[tests]
+        run: pip install .[tests,tests-es${{ matrix.elasticsearch }}]
       - name: "🧪 Test Python code"
         run: pytest --cov --cov-report=xml .
       - name: "📤 Upload coverage to Codecov"
         uses: codecov/codecov-action@v5
-        if: matrix.python == '3.13'
+        if: matrix.python == '3.13' && matrix.elasticsearch == '8x'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
   python-publish:
