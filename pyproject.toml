@@ -29,7 +29,7 @@ tests = [
     "mypy~=1.6",
     "pydantic[email]~=2.11",
     "pytest~=8.0",
-    "pytest-cov~=6.3",
+    "pytest-cov>=6.3,<8.0",
     "ruff~=0.9",
 ]
 tests-es6 = ["elasticsearch-dsl~=6.0"]
