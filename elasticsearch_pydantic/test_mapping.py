@@ -57,7 +57,6 @@ from elasticsearch_pydantic.field import (
     BooleanField,
     ByteField,
     CompletionField,
-    ConstantKeywordField,  # type: ignore[no-redef]
     DateField,
     DatetimeField,
     DateRangeField,
@@ -75,6 +74,7 @@ from elasticsearch_pydantic.field import (
     LongField,
     LongRangeField,
     RankFeatureField,  # type: ignore[no-redef]
+    RankFeaturesField,  # type: ignore[no-redef]
     SearchAsYouTypeField,  # type: ignore[no-redef]
     ShortField,
     SparseVectorField,  # type: ignore[no-redef]
@@ -89,7 +89,6 @@ from elasticsearch_pydantic._compat import (
     Boolean,
     Byte,
     Completion,
-    ConstantKeyword,
     Date,
     DateRange,
     Double,
@@ -104,22 +103,18 @@ from elasticsearch_pydantic._compat import (
     Keyword,
     Long,
     LongRange,
-    RankFeature,
-    RankFeatures,
-    SearchAsYouType,
+    RankFeature,  # type: ignore[no-redef]
+    RankFeatures,  # type: ignore[no-redef]
+    SearchAsYouType,  # type: ignore[no-redef]
     Short,
-    SparseVector,
+    SparseVector,  # type: ignore[no-redef]
     Text,
     TokenCount,
     Object,
     Nested,
-    Mapping,
 )
 
 # Re-define missing types as `Field` to avoid `NotImplemented` checks everywhere.
-if ConstantKeyword is NotImplemented:
-    ConstantKeyword: TypeAlias = Field  # type: ignore[no-redef]
-    ConstantKeywordField: TypeAlias = Annotated[Any, Field]  # type: ignore[no-redef,misc]
 if RankFeature is NotImplemented:
     RankFeature: TypeAlias = Field  # type: ignore[no-redef]
     RankFeatureField: TypeAlias = Annotated[Any, Field]  # type: ignore[no-redef,misc]
@@ -381,7 +376,6 @@ def test_mapping_field_type_annotation() -> Any:
         boolean_field = Boolean(required=True, multi=False)
         byte_field = Byte(required=True, multi=False)
         completion_field = Completion(required=True, multi=False)
-        constant_keyword_field = ConstantKeyword(required=True, multi=False)
         date_field = Date(required=True, multi=False)
         datetime_field = Date(required=True, multi=False)
         date_range_field = DateRange(required=True, multi=False)
@@ -414,7 +408,6 @@ def test_mapping_field_type_annotation() -> Any:
         boolean_field: BooleanField
         byte_field: ByteField
         completion_field: CompletionField
-        constant_keyword_field: ConstantKeywordField
         date_field: DateField
         datetime_field: DatetimeField
         date_range_field: DateRangeField
@@ -453,7 +446,6 @@ def test_mapping_field_type_annotation_multi() -> Any:
         boolean_field = Boolean(required=True, multi=True)
         byte_field = Byte(required=True, multi=True)
         completion_field = Completion(required=True, multi=True)
-        # constant_keyword_field = ConstantKeyword(required=True, multi=True)
         date_field = Date(required=True, multi=True)
         datetime_field = Date(required=True, multi=True)
         date_range_field = DateRange(required=True, multi=True)
@@ -470,11 +462,11 @@ def test_mapping_field_type_annotation_multi() -> Any:
         keyword_field = Keyword(required=True, multi=True)
         long_field = Long(required=True, multi=True)
         long_range_field = LongRange(required=True, multi=True)
-        # rank_feature_field = RankFeature(required=True, multi=True)
-        # rank_features_field = RankFeatures(required=True, multi=True)
-        # search_as_you_type_field = SearchAsYouType(required=True, multi=True)
+        rank_feature_field = RankFeature(required=True, multi=True)
+        rank_features_field = RankFeatures(required=True, multi=True)
+        search_as_you_type_field = SearchAsYouType(required=True, multi=True)
         short_field = Short(required=True, multi=True)
-        # sparse_vector_field = SparseVector(required=True, multi=True)
+        sparse_vector_field = SparseVector(required=True, multi=True)
         text_field = Text(required=True, multi=True)
         token_count_field = TokenCount(required=True, multi=True)
 
@@ -486,7 +478,6 @@ def test_mapping_field_type_annotation_multi() -> Any:
         boolean_field: Iterable[BooleanField]
         byte_field: Iterable[ByteField]
         completion_field: Iterable[CompletionField]
-        # constant_keyword_field: Iterable[ConstantKeywordField]
         date_field: Iterable[DateField]
         datetime_field: Iterable[DatetimeField]
         date_range_field: Iterable[DateRangeField]
@@ -503,11 +494,11 @@ def test_mapping_field_type_annotation_multi() -> Any:
         keyword_field: Iterable[KeywordField]
         long_field: Iterable[LongField]
         long_range_field: Iterable[LongRangeField]
-        # rank_feature_field: Iterable[RankFeatureField]
-        # rank_features_field: Iterable[RankFeaturesField]
-        # search_as_you_type_field: Iterable[SearchAsYouTypeField]
+        rank_feature_field: Iterable[RankFeatureField]
+        rank_features_field: Iterable[RankFeaturesField]
+        search_as_you_type_field: Iterable[SearchAsYouTypeField]
         short_field: Iterable[ShortField]
-        # sparse_vector_field: Iterable[SparseVectorField]
+        sparse_vector_field: Iterable[SparseVectorField]
         text_field: Iterable[TextField]
         token_count_field: Iterable[TokenCountField]
 
