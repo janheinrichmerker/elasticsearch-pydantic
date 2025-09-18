@@ -44,11 +44,11 @@ jobs:
           - "3.13"
         elasticsearch:
           - "6"
-          - "6x"
+          - "6-major"
           - "7"
-          - "7x"
+          - "7-major"
           - "8"
-          - "8x"
+          - "8-major"
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Check-out
@@ -73,11 +73,11 @@ jobs:
           - "3.13"
         elasticsearch:
           - "6"
-          - "6x"
+          - "6-major"
           - "7"
-          - "7x"
+          - "7-major"
           - "8"
-          - "8x"
+          - "8-major"
     runs-on: ubuntu-latest
     steps:
       - name: "📥 Check-out"
@@ -104,11 +104,11 @@ jobs:
           - "3.13"
         elasticsearch:
           - "6"
-          - "6x"
+          - "6-major"
           - "7"
-          - "7x"
+          - "7-major"
           - "8"
-          - "8x"
+          - "8-major"
     runs-on: ubuntu-latest
     steps:
       - name: "📥 Check-out"
@@ -125,7 +125,7 @@ jobs:
         run: pytest --cov --cov-report=xml .
       - name: "📤 Upload coverage to Codecov"
         uses: codecov/codecov-action@v5
-        if: matrix.python == '3.13' && matrix.elasticsearch == '8x'
+        if: matrix.python == '3.13' && matrix.elasticsearch == '8-major'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
   python-publish:
