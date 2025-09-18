@@ -62,8 +62,6 @@ if _is_installed("elasticsearch8-dsl"):
     from elasticsearch8_dsl.utils import (  # type: ignore[no-redef]
         HitMeta as HitMeta,
         AttrDict as AttrDict,
-        META_FIELDS as META_FIELDS,
-        DOC_META_FIELDS as DOC_META_FIELDS,
     )
 elif _is_installed("elasticsearch7-dsl"):
     from elasticsearch7_dsl import (  # type: ignore[no-redef]
@@ -107,8 +105,6 @@ elif _is_installed("elasticsearch7-dsl"):
     from elasticsearch7_dsl.utils import (  # type: ignore[no-redef]
         HitMeta as HitMeta,
         AttrDict as AttrDict,
-        META_FIELDS as META_FIELDS,
-        DOC_META_FIELDS as DOC_META_FIELDS,
     )
 
     RankFeatures = NotImplemented  # type: ignore
@@ -151,8 +147,6 @@ elif _is_installed("elasticsearch6-dsl"):
     from elasticsearch6_dsl.utils import (  # type: ignore[no-redef]
         HitMeta as HitMeta,
         AttrDict as AttrDict,
-        META_FIELDS as META_FIELDS,
-        DOC_META_FIELDS as DOC_META_FIELDS,
     )
 
     RankFeature = NotImplemented  # type: ignore
@@ -202,8 +196,6 @@ elif _is_installed("elasticsearch-dsl"):
     from elasticsearch_dsl.utils import (  # type: ignore[no-redef,assignment]
         HitMeta as HitMeta,
         AttrDict as AttrDict,
-        META_FIELDS as META_FIELDS,
-        DOC_META_FIELDS as DOC_META_FIELDS,
     )
 
     if _is_version_at_least("elasticsearch-dsl", "8.0.0"):

@@ -86,12 +86,26 @@ from elasticsearch_pydantic._compat import (
     DocumentOptions,
     DocumentMeta,
     HitMeta,
-    META_FIELDS,
     ObjectApiResponse,
     Binary,
 )
 
-_META_FIELDS = META_FIELDS | {"type"}
+
+_META_FIELDS = frozenset(
+    (
+        "id",
+        "index",
+        "parentindex",
+        "primary_term",
+        "routing",
+        "score",
+        "seq_no",
+        "type",
+        "using",
+        "version",
+        "version_type",
+    )
+)
 
 
 class _FieldFactory(Protocol):
@@ -434,20 +448,41 @@ class BaseDocument(
         validation_alias=AliasChoices("_id", "id"),
         serialization_alias="_id",
     )
-    type: str | None = PydanticModelField(
+    index: str | None = PydanticModelField(
         default=None,
-        validation_alias=AliasChoices("_type", "type"),
-        serialization_alias="_type",
+        validation_alias=AliasChoices("_index", "index"),
+        serialization_alias="_index",
+    )
+    parentindex: str | None = PydanticModelField(
+        default=None,
+        validation_alias=AliasChoices("_parentindex", "parentindex"),
+        serialization_alias="_parentindex",
+    )
+    primary_term: int | None = PydanticModelField(
+        default=None,
+        validation_alias=AliasChoices("_primary_term", "primary_term"),
+        serialization_alias="_primary_term",
     )
     routing: str | None = PydanticModelField(
         default=None,
         validation_alias=AliasChoices("_routing", "routing"),
         serialization_alias="_routing",
     )
-    index: str | None = PydanticModelField(
+    score: float | None = PydanticModelField(
         default=None,
-        validation_alias=AliasChoices("_index", "index"),
-        serialization_alias="_index",
+        init=False,
+        validation_alias=AliasChoices("_score", "score"),
+        serialization_alias="_score",
+    )
+    seq_no: int | None = PydanticModelField(
+        default=None,
+        validation_alias=AliasChoices("_seq_no", "seq_no"),
+        serialization_alias="_seq_no",
+    )
+    type: str | None = PydanticModelField(
+        default=None,
+        validation_alias=AliasChoices("_type", "type"),
+        serialization_alias="_type",
     )
     using: str | None = PydanticModelField(
         default=None,
@@ -459,21 +494,10 @@ class BaseDocument(
         validation_alias=AliasChoices("_version", "version"),
         serialization_alias="_version",
     )
-    seq_no: int | None = PydanticModelField(
+    version_type: str | None = PydanticModelField(
         default=None,
-        validation_alias=AliasChoices("_seq_no", "seq_no"),
-        serialization_alias="_seq_no",
-    )
-    primary_term: int | None = PydanticModelField(
-        default=None,
-        validation_alias=AliasChoices("_primary_term", "primary_term"),
-        serialization_alias="_primary_term",
-    )
-    score: float | None = PydanticModelField(
-        default=None,
-        init=False,
-        validation_alias=AliasChoices("_score", "score"),
-        serialization_alias="_score",
+        validation_alias=AliasChoices("_version_type", "version_type"),
+        serialization_alias="_version_type",
     )
 
     @property
