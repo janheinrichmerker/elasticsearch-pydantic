@@ -23,7 +23,8 @@ from typing import (
     Protocol,
     Pattern,
     Tuple,
-    Iterator,
+    dataclass_transform,
+    cast,
 )
 from typing_extensions import Self  # type: ignore[import]
 from uuid import UUID
@@ -58,8 +59,11 @@ from pydantic import (
     PastDatetime,
     FutureDatetime,
     NameEmail,
+    PrivateAttr as PydanticModelPrivateAttr,
+    Field as PydanticModelField,
+    AliasChoices,
 )
-from pydantic._internal._model_construction import ModelMetaclass
+from pydantic._internal._model_construction import ModelMetaclass, NoInitField
 from pydantic_core import Url
 
 from elasticsearch_pydantic._compat import (
@@ -83,10 +87,11 @@ from elasticsearch_pydantic._compat import (
     DocumentMeta,
     HitMeta,
     META_FIELDS,
-    DOC_META_FIELDS,
     ObjectApiResponse,
     Binary,
 )
+
+_META_FIELDS = META_FIELDS | {"type"}
 
 
 class _FieldFactory(Protocol):
@@ -291,6 +296,10 @@ def _get_type_hint_field(
     return None
 
 
+@dataclass_transform(
+    kw_only_default=True,
+    field_specifiers=(PydanticModelField, PydanticModelPrivateAttr, NoInitField),
+)
 class _ModelDocumentMeta(ModelMetaclass, DocumentMeta):
     def __new__(
         cls,
@@ -320,6 +329,8 @@ class _ModelDocumentMeta(ModelMetaclass, DocumentMeta):
 
         # Register mappings based on type hints.
         for key, field_info in new_cls.model_fields.items():
+            if key in _META_FIELDS:
+                continue
             field = _get_type_hint_field(
                 annotation=field_info.annotation,
                 multi=False,
@@ -331,6 +342,8 @@ class _ModelDocumentMeta(ModelMetaclass, DocumentMeta):
 
         # Warn about missing Elasticsearch field types.
         for key, field_info in new_cls.model_fields.items():
+            if key in _META_FIELDS:
+                continue
             if mapping.resolve_field(key) is None:
                 mro = cls.mro(cls)  # type: ignore
                 warn(
@@ -339,11 +352,15 @@ class _ModelDocumentMeta(ModelMetaclass, DocumentMeta):
                 )
 
         # Assign document type to the new class.
-        new_cls._doc_type = doc_options  # type: ignore[assignment]
+        new_cls._doc_type = doc_options
 
         return new_cls
 
 
+@dataclass_transform(
+    kw_only_default=True,
+    field_specifiers=(PydanticModelField, PydanticModelPrivateAttr, NoInitField),
+)
 class _ModelIndexMeta(_ModelDocumentMeta, IndexMeta):
     def __new__(
         cls,
@@ -359,15 +376,16 @@ class _ModelIndexMeta(_ModelDocumentMeta, IndexMeta):
         annotations.pop("_index", None)
 
         # Create new document class.
-        new_cls: type[BaseDocument] = super().__new__(
-            cls, name, bases, namespace, **kwds
-        )  # type: ignore
+        new_cls: type[BaseDocument] = cast(
+            "type[BaseDocument]",
+            super().__new__(cls, name, bases, namespace, **kwds),
+        )
 
         # Associate index with document class (but not the base class).
         if len(bases) > 2:
             index_opts = namespace.pop("Index", None)
             index: Index = cls.construct_index(index_opts, bases)
-            new_cls._index = index  # type: ignore[assignment]
+            new_cls._index = index
             index.document(new_cls)
 
         return new_cls
@@ -380,58 +398,25 @@ class BaseInnerDocument(
     validate_assignment=True,
     arbitrary_types_allowed=True,
 ):
-    def __init__(
-        self,
-        /,
-        meta: dict[str, Any] | None = None,
-        **data: Any,
-    ) -> None:
-        if meta is None:
-            meta = {}
-
-        # Extract meta fields from data.
-        for key in data.keys():
-            if key.startswith("_") and key[1:] in META_FIELDS:
-                meta[key] = data.pop(key)
-
-        # Initialize the document.
-        super().__init__(**data)
-
-        # Update meta information.
-        self._meta = HitMeta(meta)
-
-    @property
-    def meta(self) -> HitMeta:  # type: ignore[override]
-        if self._meta is None:
-            raise RuntimeError("Meta information is not set.")
-        return self._meta
+    _doc_type: DocumentOptions = PydanticModelPrivateAttr()
 
     @classmethod
-    def from_es(cls, data: dict[str, Any], data_only: bool = False) -> Self:  # type: ignore[override]
+    def from_es(cls, data: dict[str, Any], data_only: bool = False) -> Self:
         if data_only:
             data = {"_source": data}
-        meta = data.copy()
-        return cls(
-            meta=meta,
-            **meta.pop("_source", {}),
-        )
+        meta = {
+            key: value
+            for key, value in data.items()
+            if key.startswith("_") and key[1:] in _META_FIELDS
+        }
+        return cls(**data["_source"], **meta)
 
     def to_dict(self, skip_empty: bool = True) -> dict[str, Any]:
         return self.model_dump(
             mode="json",
             exclude_unset=skip_empty,
+            by_alias=True,
         )
-
-    # Explicitly override methods with Pydantic super calls.
-
-    def __getstate__(self) -> dict[Any, Any]:  # type: ignore[override]
-        return super().__getstate__()
-
-    def __setstate__(self, state: dict[Any, Any]) -> None:  # type: ignore[override]
-        super().__setstate__(state)
-
-    def __iter__(self) -> Iterator[tuple[str, Any]]:  # type: ignore[override]
-        return super().__iter__()
 
 
 class BaseDocument(
@@ -441,122 +426,154 @@ class BaseDocument(
     validate_assignment=True,
     arbitrary_types_allowed=True,
 ):
-    def __init__(
-        self,
-        /,
-        id: str | None = None,
-        meta: dict[str, Any] | None = None,
-        **data: Any,
-    ) -> None:
-        if meta is None:
-            meta = {}
+    _doc_type: DocumentOptions = PydanticModelPrivateAttr()
+    _index: Index = PydanticModelPrivateAttr()
 
-        # Extract meta fields from data.
-        for key in data.keys():
-            if key.startswith("_") and key[1:] in META_FIELDS:
-                meta[key] = data.pop(key)
-
-        # Initialize the document.
-        super().__init__(**data)
-
-        # Set document ID.
-        if id is not None:
-            meta["_id"] = id
-
-        # Update meta information.
-        self._meta = HitMeta(meta)
+    id: str | None = PydanticModelField(
+        default=None,
+        validation_alias=AliasChoices("_id", "id"),
+        serialization_alias="_id",
+    )
+    type: str | None = PydanticModelField(
+        default=None,
+        validation_alias=AliasChoices("_type", "type"),
+        serialization_alias="_type",
+    )
+    routing: str | None = PydanticModelField(
+        default=None,
+        validation_alias=AliasChoices("_routing", "routing"),
+        serialization_alias="_routing",
+    )
+    index: str | None = PydanticModelField(
+        default=None,
+        validation_alias=AliasChoices("_index", "index"),
+        serialization_alias="_index",
+    )
+    using: str | None = PydanticModelField(
+        default=None,
+        validation_alias=AliasChoices("_using", "using"),
+        serialization_alias="_using",
+    )
+    version: int | None = PydanticModelField(
+        default=None,
+        validation_alias=AliasChoices("_version", "version"),
+        serialization_alias="_version",
+    )
+    seq_no: int | None = PydanticModelField(
+        default=None,
+        validation_alias=AliasChoices("_seq_no", "seq_no"),
+        serialization_alias="_seq_no",
+    )
+    primary_term: int | None = PydanticModelField(
+        default=None,
+        validation_alias=AliasChoices("_primary_term", "primary_term"),
+        serialization_alias="_primary_term",
+    )
+    score: float | None = PydanticModelField(
+        default=None,
+        init=False,
+        validation_alias=AliasChoices("_score", "score"),
+        serialization_alias="_score",
+    )
 
     @property
-    def meta(self) -> HitMeta:  # type: ignore[override]
-        if self._meta is None:
-            raise RuntimeError("Meta information is not set.")
-        return self._meta
+    def meta(self) -> HitMeta:
+        return HitMeta(
+            document={
+                "id": self.id,
+                "type": self.type,
+                "routing": self.routing,
+                "index": self.index,
+                "using": self.using,
+                "score": self.score,
+                "version": self.version,
+                "seq_no": self.seq_no,
+                "primary_term": self.primary_term,
+            }
+        )
 
     @classmethod
     def from_es(cls, hit: Union[dict[str, Any], ObjectApiResponse[Any]]) -> Self:
-        super().from_es(hit)
-        meta = hit.copy()
-        return cls(
-            meta=meta,
-            id=meta.pop("_id", None),
-            **meta.pop("_source", {}),
-        )
+        meta = {
+            key: value
+            for key, value in hit.items()
+            if key.startswith("_") and key[1:] in _META_FIELDS
+        }
+        return cls(**hit["_source"], **meta)
 
-    def to_dict(  # type: ignore[override]
+    def to_dict(
         self,
         include_meta: bool = False,
         skip_empty: bool = True,
     ) -> dict[str, Any]:
         doc = self.model_dump(
             mode="json",
+            exclude={key for key in _META_FIELDS},
             exclude_unset=skip_empty,
+            by_alias=True,
         )
         if not include_meta:
             return doc
 
-        meta = {
-            f"_{key}": self.meta[key] for key in DOC_META_FIELDS if key in self.meta
-        }
-
+        meta = self.model_dump(
+            mode="json",
+            include={key for key in _META_FIELDS},
+            exclude_unset=True,
+            by_alias=True,
+        )
+        meta["_source"] = doc
         index = self._get_index(required=False)
         if index is not None:
             meta["_index"] = index
 
-        meta["_source"] = doc
-
         return meta
 
+    def index_action(self) -> dict:
+        action = self.to_dict(include_meta=True)
+        action["_op_type"] = "index"
+        action.update(**action.pop("_source"))
+        return action
+
     def create_action(self) -> dict:
-        return self.to_dict(include_meta=True)
+        action = self.to_dict(include_meta=True)
+        action["_op_type"] = "create"
+        action.update(**action.pop("_source"))
+        return action
 
     def update_action(
         self,
-        retry_on_conflict: int | None = 3,
+        retry_on_conflict: int | None = None,
         **fields,
     ) -> dict:
         updated = self.model_copy(update=fields)
+
         doc = updated.model_dump(
             mode="json",
-            include={key for key, _ in fields.items()},
-            exclude={"meta"},
+            include={key for key in fields.keys()},
+            exclude={key for key in _META_FIELDS},
             exclude_unset=True,
+            by_alias=True,
         )
 
-        action = {
-            f"_{key}": self.meta[key]
-            for key in META_FIELDS.difference({"score"})
-            if key in self.meta
-        }
+        action = updated.model_dump(
+            mode="json",
+            include={key for key in _META_FIELDS},
+            exclude_unset=True,
+            by_alias=True,
+        )
         action["_op_type"] = "update"
         if retry_on_conflict is not None:
-            action["_retry_on_conflict"] = retry_on_conflict
+            action["retry_on_conflict"] = retry_on_conflict
         action["doc"] = doc
+
         return action
 
     def delete_action(self) -> dict:
-        action = {
-            f"_{key}": self.meta[key]
-            for key in META_FIELDS.difference({"score", "_source"})
-            if key in self.meta
-        }
+        action = self.model_dump(
+            mode="json",
+            include={key for key in _META_FIELDS},
+            exclude_unset=True,
+            by_alias=True,
+        )
         action["_op_type"] = "delete"
         return action
-
-    @property
-    def id(self) -> UUID:
-        return UUID(self.meta.id)
-
-    @id.setter
-    def id(self, value: UUID) -> None:
-        self.meta.id = str(value)
-
-    # Explicitly override methods with Pydantic super calls.
-
-    def __getstate__(self) -> dict[Any, Any]:  # type: ignore[override]
-        return super().__getstate__()
-
-    def __setstate__(self, state: dict[Any, Any]) -> None:  # type: ignore[override]
-        super().__setstate__(state)
-
-    def __iter__(self) -> Iterator[tuple[str, Any]]:  # type: ignore[override]
-        return super().__iter__()
