@@ -87,6 +87,18 @@ class BlogPost(BaseDocument):
     tags: list[KeywordField]
 ```
 
+### Accessing meta fields
+
+For convenience, the Elasticsearch meta fields (like `_id`, `_index`, `_score`, etc.) are directly accessible as attributes on your document models:
+
+```python
+post = BlogPost(id="1", title="My first post")
+print(post.id)        # Access the document ID
+print(post.meta.index)  # Access the index name
+```
+
+The `meta` attribute is kept for compatibility with Elasticsearch DSL and contains all meta fields.
+
 ### Compatibility
 
 This library works fine with any of the following Pip packages installed:
