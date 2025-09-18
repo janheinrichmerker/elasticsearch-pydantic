@@ -180,3 +180,69 @@ def test_document_delete_action() -> None:
         "_id": "1",
         "_op_type": "delete",
     }
+
+
+def test_inner_document_to_dict() -> None:
+    class _InnerDocument(BaseInnerDocument):
+        title: str
+        content: str
+
+    class _Document(BaseDocument):
+        name: str
+        inner: _InnerDocument
+
+    inner_doc = _InnerDocument(
+        title="Inner Document",
+        content="This is an inner document.",
+    )
+    doc = _Document(
+        index="test-index",
+        id="1",
+        name="Test Document",
+        inner=inner_doc,
+    )
+    doc_dict = doc.to_dict(include_meta=False)
+
+    assert isinstance(doc_dict, dict)
+    assert doc_dict == {
+        "name": "Test Document",
+        "inner": {
+            "title": "Inner Document",
+            "content": "This is an inner document.",
+        },
+    }
+
+
+def test_inner_document_to_dict_meta() -> None:
+    class _InnerDocument(BaseInnerDocument):
+        title: str
+        content: str
+
+    class _Document(BaseDocument):
+        name: str
+        inner: _InnerDocument
+
+    inner_doc = _InnerDocument(
+        title="Inner Document",
+        content="This is an inner document.",
+    )
+    doc = _Document(
+        index="test-index",
+        id="1",
+        name="Test Document",
+        inner=inner_doc,
+    )
+    doc_dict = doc.to_dict(include_meta=True)
+
+    assert isinstance(doc_dict, dict)
+    assert doc_dict == {
+        "_index": "test-index",
+        "_id": "1",
+        "_source": {
+            "name": "Test Document",
+            "inner": {
+                "title": "Inner Document",
+                "content": "This is an inner document.",
+            },
+        },
+    }
