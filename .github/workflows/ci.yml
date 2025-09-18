@@ -82,8 +82,6 @@ jobs:
     steps:
       - name: "📥 Check-out"
         uses: actions/checkout@v5
-      - name: "🧰 Install Protoc"
-        run: sudo apt install protobuf-compiler
       - name: "🧰 Install Python"
         uses: actions/setup-python@v6
         with:
