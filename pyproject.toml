@@ -37,7 +37,7 @@ tests-es6 = ["elasticsearch-dsl~=6.0"]
 tests-es6-major = ["elasticsearch6-dsl~=6.0"]
 tests-es7 = ["elasticsearch-dsl~=7.0"]
 tests-es7-major = ["elasticsearch7-dsl~=7.0"]
-tests-es8 = ["elasticsearch-dsl~=8.11.0"]
+tests-es8 = ["elasticsearch-dsl>=8.11,<8.13"]
 tests-es8-major = ["elasticsearch8-dsl~=8.11.0"]
 
 [project.urls]
