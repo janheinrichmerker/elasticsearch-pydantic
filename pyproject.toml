@@ -20,7 +20,7 @@ classifiers = [
 ]
 dependencies = [
     "annotated-types~=0.7.0",
-    "elastic-transport~=8.0",
+    "elastic-transport>=8,<10",
     "pydantic~=2.11",
 ]
 dynamic = ["version"]
