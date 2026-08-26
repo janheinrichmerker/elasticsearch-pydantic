@@ -585,7 +585,8 @@ class BaseDocument(
             exclude_unset=True,
             by_alias=True,
         )
-        action["_op_type"] = "update"
+        if "score" in action:
+            del action["score"]
         if retry_on_conflict is not None:
             action["retry_on_conflict"] = retry_on_conflict
         action["doc"] = doc
