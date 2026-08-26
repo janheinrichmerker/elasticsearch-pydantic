@@ -29,7 +29,7 @@ dynamic = ["version"]
 tests = [
     "mypy~=1.6",
     "pydantic[email]~=2.11",
-    "pytest~=8.0",
+    "pytest>=8,<10",
     "pytest-cov>=6.3,<8.0",
     "ruff~=0.9",
 ]
