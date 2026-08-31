@@ -27,7 +27,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 tests = [
-    "mypy~=1.6",
+    "mypy>=1.6,<3.0",
     "pydantic[email]~=2.11",
     "pytest>=8,<10",
     "pytest-cov>=6.3,<8.0",
