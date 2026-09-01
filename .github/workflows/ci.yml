@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "📥 Check-out"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: "🧰 Install Python"
         uses: actions/setup-python@v6
         with:
@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Check-out
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: 🧰 Install Python
         uses: actions/setup-python@v6
         with:
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "📥 Check-out"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: "🧰 Install Python"
         uses: actions/setup-python@v6
         with:
@@ -110,7 +110,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "📥 Check-out"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: "🧰 Install Python"
         uses: actions/setup-python@v6
         with:
@@ -139,7 +139,7 @@ jobs:
       id-token: write
     steps:
       - name: "📥 Check-out"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: "📥 Download Python wheels"
         uses: actions/download-artifact@v7
         with:
@@ -161,7 +161,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "📥 Check-out"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: "📥 Download Python wheels"
         uses: actions/download-artifact@v7
         with:
