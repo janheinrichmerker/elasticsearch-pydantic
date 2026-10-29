@@ -409,9 +409,7 @@ class _ModelHitMeta(HitMeta):
     """Hit meta that writes changes through to the meta fields of the document."""
 
     def __init__(self, document: "BaseDocument") -> None:
-        super().__init__(
-            document={key: getattr(document, key) for key in _META_FIELDS}
-        )
+        super().__init__(document={key: getattr(document, key) for key in _META_FIELDS})
         object.__setattr__(self, "_document", document)
 
     def __setattr__(self, name: str, value: Any) -> None:
@@ -564,6 +562,11 @@ class BaseDocument(
     def clean_fields(self) -> None:
         # Fields are already validated by Pydantic.
         pass
+
+    def update(self, *args: Any, **kwargs: Any) -> Any:
+        raise NotImplementedError(
+            "Partial updates via update() are not yet supported for Pydantic documents. Instead, assign the new field values and call save(), or use update_action() with the bulk helpers."
+        )
 
     def index_action(self) -> dict:
         action = self.to_dict(include_meta=True)
