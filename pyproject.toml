@@ -56,6 +56,10 @@ exclude = ["build", "venv", "examples"]
 [tool.ruff]
 exclude = ["build", "venv"]
 
+[tool.ruff.lint.per-file-ignores]
+# Tests intentionally cover legacy `typing` annotations.
+"**/test_*.py" = ["UP006", "UP007", "UP035", "UP045"]
+
 [tool.mypy]
 exclude = ["build", "venv"]
 ignore_missing_imports = true
