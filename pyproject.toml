@@ -19,7 +19,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-    "annotated-types~=0.7.0",
+    "annotated-types>=0.7,<0.9",
     "elastic-transport>=8,<10",
     "pydantic~=2.11",
 ]
@@ -27,7 +27,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 tests = [
-    "mypy~=1.6",
+    "mypy>=1.6,<3.0",
     "pydantic[email]~=2.11",
     "pytest>=8,<10",
     "pytest-cov>=6.3,<8.0",
