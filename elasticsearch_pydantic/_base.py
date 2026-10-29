@@ -166,15 +166,13 @@ _standard_field_types = {
 
 def _is_iterable_type(origin: Any, args: Sequence[Any]) -> bool:
     # `Tuple`'s where all arguments are the same type (excluding a trailing `...`).
-    if origin is Tuple or origin is tuple:
+    if origin is tuple:
         if args[-1] is Ellipsis:
             return len(args) == 2
         arg = args[0]
         return all(a is arg for a in args[1:])
     # Iterable types (e.g., lists, sets, iterators) with a single argument.
-    if isinstance(origin, type) and hasattr(origin, "__iter__") and len(args) == 1:
-        return True
-    return False
+    return isinstance(origin, type) and hasattr(origin, "__iter__") and len(args) == 1
 
 
 def _get_type_hint_field(
@@ -591,7 +589,7 @@ class BaseDocument(
 
         doc = updated.model_dump(
             mode="json",
-            include={key for key in fields.keys()},
+            include={key for key in fields},
             exclude={key for key in _META_FIELDS},
             exclude_unset=True,
             by_alias=True,
