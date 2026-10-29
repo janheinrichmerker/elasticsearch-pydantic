@@ -1,52 +1,52 @@
 from collections import deque
-from datetime import datetime, date
+from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum, IntEnum, StrEnum
 from ipaddress import (
     IPv4Address,
-    IPv6Address,
     IPv4Interface,
-    IPv6Interface,
     IPv4Network,
+    IPv6Address,
+    IPv6Interface,
     IPv6Network,
 )
 from pathlib import Path
 from typing import (
-    Any,
-    Pattern,
-    Union,
-    Optional,
+    AbstractSet,
     Annotated,
-    Sequence,
-    Set,
-    List,
-    Tuple,
-    Iterable,
+    Any,
     Deque,
     FrozenSet,
-    AbstractSet,
+    Iterable,
+    List,
+    Optional,
+    Pattern,
+    Sequence,
+    Set,
+    Tuple,
+    Union,
 )
 from uuid import UUID
 
 from pydantic import (
     AnyUrl,
-    EmailStr,
-    Base64Str,
+    AwareDatetime,
     Base64Bytes,
+    Base64Str,
+    ByteSize,
+    EmailStr,
+    FutureDate,
+    FutureDatetime,
     IPvAnyAddress,
     IPvAnyInterface,
     IPvAnyNetwork,
-    SecretStr,
-    SecretBytes,
-    PaymentCardNumber,
-    ByteSize,
-    PastDate,
-    FutureDate,
-    AwareDatetime,
     NaiveDatetime,
-    PastDatetime,
-    FutureDatetime,
     NameEmail,
+    PastDate,
+    PastDatetime,
+    PaymentCardNumber,
+    SecretBytes,
+    SecretStr,
 )
 from pydantic_core import Url
 from typing_extensions import TypeAlias  # type: ignore[import]
@@ -59,8 +59,8 @@ from elasticsearch_pydantic import (
     ByteField,
     CompletionField,
     DateField,
-    DatetimeField,
     DateRangeField,
+    DatetimeField,
     DatetimeRangeField,
     DoubleField,
     DoubleRangeField,
@@ -83,20 +83,20 @@ from elasticsearch_pydantic import (
     TokenCountField,
 )
 from elasticsearch_pydantic._compat import (
-    Field,
-    Document,
-    InnerDoc,
     Binary,
     Boolean,
     Byte,
     Completion,
     Date,
     DateRange,
+    Document,
     Double,
     DoubleRange,
+    Field,
     Float,
     FloatRange,
     HalfFloat,
+    InnerDoc,
     Integer,
     IntegerRange,
     Ip,
@@ -104,6 +104,8 @@ from elasticsearch_pydantic._compat import (
     Keyword,
     Long,
     LongRange,
+    Nested,
+    Object,
     RankFeature,  # type: ignore[no-redef]
     RankFeatures,  # type: ignore[no-redef]
     SearchAsYouType,  # type: ignore[no-redef]
@@ -111,8 +113,6 @@ from elasticsearch_pydantic._compat import (
     SparseVector,  # type: ignore[no-redef]
     Text,
     TokenCount,
-    Object,
-    Nested,
 )
 
 # Re-define missing types as `Field` to avoid `NotImplemented` checks everywhere.

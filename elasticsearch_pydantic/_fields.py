@@ -1,9 +1,14 @@
-from datetime import datetime, date
-from typing import Annotated, Generic, TypeVar, Mapping
-from typing_extensions import TypeAlias  # type: ignore[import]
+from collections.abc import Mapping
+from datetime import date, datetime
+from typing import (
+    Annotated,
+    Generic,
+    TypeAlias,  # type: ignore[import]
+    TypeVar,
+)
 
 from annotated_types import Interval
-from pydantic import BaseModel, Base64Str, IPvAnyAddress
+from pydantic import Base64Str, BaseModel, IPvAnyAddress
 
 from elasticsearch_pydantic._compat import (
     Binary,

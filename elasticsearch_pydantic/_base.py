@@ -1,32 +1,31 @@
-from datetime import datetime, date
+from collections.abc import Sequence
+from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum, IntEnum
 from ipaddress import (
     IPv4Address,
-    IPv6Address,
     IPv4Interface,
-    IPv6Interface,
     IPv4Network,
+    IPv6Address,
+    IPv6Interface,
     IPv6Network,
 )
 from pathlib import Path
+from re import Pattern
 from types import NoneType
 from typing import (
-    Literal,
     Annotated,
     Any,
-    Sequence,
+    Literal,
     Optional,
+    Protocol,
+    Self,  # type: ignore[import]
     Union,
+    cast,
+    dataclass_transform,
     get_args,
     get_origin,
-    Protocol,
-    Pattern,
-    Tuple,
-    dataclass_transform,
-    cast,
 )
-from typing_extensions import Self  # type: ignore[import]
 from uuid import UUID
 from warnings import warn
 
@@ -40,56 +39,59 @@ except ImportError:
     StrEnum = NotImplemented  # type: ignore
 
 from pydantic import (
-    BaseModel,
+    AliasChoices,
     AnyUrl,
-    EmailStr,
-    Base64Str,
+    AwareDatetime,
     Base64Bytes,
+    Base64Str,
+    BaseModel,
+    ByteSize,
+    EmailStr,
+    FutureDate,
+    FutureDatetime,
     IPvAnyAddress,
     IPvAnyInterface,
     IPvAnyNetwork,
-    SecretStr,
-    SecretBytes,
-    PaymentCardNumber,
-    ByteSize,
-    PastDate,
-    FutureDate,
-    AwareDatetime,
     NaiveDatetime,
-    PastDatetime,
-    FutureDatetime,
     NameEmail,
-    PrivateAttr as PydanticModelPrivateAttr,
+    PastDate,
+    PastDatetime,
+    PaymentCardNumber,
+    SecretBytes,
+    SecretStr,
+)
+from pydantic import (
     Field as PydanticModelField,
-    AliasChoices,
+)
+from pydantic import (
+    PrivateAttr as PydanticModelPrivateAttr,
 )
 from pydantic._internal._model_construction import ModelMetaclass, NoInitField
 from pydantic_core import Url
 
 from elasticsearch_pydantic._compat import (
-    Document,
-    Keyword,
-    Date,
-    InnerDoc,
-    Object,
-    Index,
-    Integer,
-    Nested,
-    Long,
-    Boolean,
-    Mapping,
-    Field,
-    Ip,
-    Double,
-    Text,
-    IndexMeta,
-    DocumentOptions,
-    DocumentMeta,
-    HitMeta,
-    ObjectApiResponse,
     Binary,
+    Boolean,
+    Date,
+    Document,
+    DocumentMeta,
+    DocumentOptions,
+    Double,
+    Field,
+    HitMeta,
+    Index,
+    IndexMeta,
+    InnerDoc,
+    Integer,
+    Ip,
+    Keyword,
+    Long,
+    Mapping,
+    Nested,
+    Object,
+    ObjectApiResponse,
+    Text,
 )
-
 
 _META_FIELDS = frozenset(
     (
