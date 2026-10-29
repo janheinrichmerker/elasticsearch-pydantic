@@ -190,8 +190,12 @@ def _get_type_hint_field(
         )
 
     # Check if any standard type matches directly.
+    # Bare `typing` aliases (e.g., `typing.Pattern`) are resolved to their origin.
+    standard_annotation = (
+        get_origin(annotation) if len(get_args(annotation)) == 0 else None
+    ) or annotation
     for standard_type, field_type_factory in _standard_field_types.items():
-        if annotation is standard_type:
+        if standard_annotation is standard_type:
             return field_type_factory(multi=multi, required=required)
 
     # Wrap `InnerDoc`s as Object field type.
