@@ -179,8 +179,8 @@ def _get_type_hint_field(
     annotation: Any,
     multi: bool,
     required: bool,
-    metadata: Sequence[Any] = tuple(),
-) -> Optional[Field]:
+    metadata: Sequence[Any] = (),
+) -> Field | None:
     # Map back `Annotated` types.
     if len(metadata) > 0:
         return _get_type_hint_field(
@@ -524,7 +524,7 @@ class BaseDocument(
         return _ModelHitMeta(self)
 
     @classmethod
-    def from_es(cls, hit: Union[dict[str, Any], ObjectApiResponse[Any]]) -> Self:
+    def from_es(cls, hit: dict[str, Any] | ObjectApiResponse[Any]) -> Self:
         meta = {
             key: value
             for key, value in hit.items()
