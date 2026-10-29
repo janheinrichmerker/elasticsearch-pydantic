@@ -63,6 +63,7 @@ if _is_installed("elasticsearch8-dsl"):
         HitMeta as HitMeta,
         AttrDict as AttrDict,
     )
+    from elasticsearch import Elasticsearch as Elasticsearch  # type: ignore[no-redef]
 elif _is_installed("elasticsearch7-dsl"):
     from elasticsearch7_dsl import (  # type: ignore[no-redef]
         Document as Document,
@@ -106,6 +107,7 @@ elif _is_installed("elasticsearch7-dsl"):
         HitMeta as HitMeta,
         AttrDict as AttrDict,
     )
+    from elasticsearch7 import Elasticsearch as Elasticsearch  # type: ignore[no-redef]
 
     RankFeatures = NotImplemented  # type: ignore
 elif _is_installed("elasticsearch6-dsl"):
@@ -148,6 +150,7 @@ elif _is_installed("elasticsearch6-dsl"):
         HitMeta as HitMeta,
         AttrDict as AttrDict,
     )
+    from elasticsearch6 import Elasticsearch as Elasticsearch  # type: ignore[no-redef]
 
     RankFeature = NotImplemented  # type: ignore
     RankFeatures = NotImplemented  # type: ignore
@@ -197,6 +200,7 @@ elif _is_installed("elasticsearch-dsl"):
         HitMeta as HitMeta,
         AttrDict as AttrDict,
     )
+    from elasticsearch import Elasticsearch as Elasticsearch  # type: ignore[no-redef,assignment]
 
     if _is_version_at_least("elasticsearch-dsl", "8.0.0"):
         from elasticsearch_dsl import RankFeatures as RankFeatures  # type: ignore[no-redef,assignment]
