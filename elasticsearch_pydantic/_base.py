@@ -405,6 +405,23 @@ class _ModelIndexMeta(_ModelDocumentMeta, IndexMeta):
         return new_cls
 
 
+class _ModelHitMeta(HitMeta):
+    """Hit meta that writes changes through to the meta fields of the document."""
+
+    def __init__(self, document: "BaseDocument") -> None:
+        super().__init__(
+            document={key: getattr(document, key) for key in _META_FIELDS}
+        )
+        object.__setattr__(self, "_document", document)
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        super().__setattr__(name, value)
+        if name == "doc_type":
+            name = "type"
+        if name in _META_FIELDS:
+            setattr(self._document, name, value)
+
+
 class BaseInnerDocument(
     BaseModel,
     InnerDoc,
@@ -506,19 +523,7 @@ class BaseDocument(
 
     @property
     def meta(self) -> HitMeta:
-        return HitMeta(
-            document={
-                "id": self.id,
-                "type": self.type,
-                "routing": self.routing,
-                "index": self.index,
-                "using": self.using,
-                "score": self.score,
-                "version": self.version,
-                "seq_no": self.seq_no,
-                "primary_term": self.primary_term,
-            }
-        )
+        return _ModelHitMeta(self)
 
     @classmethod
     def from_es(cls, hit: Union[dict[str, Any], ObjectApiResponse[Any]]) -> Self:
