@@ -432,6 +432,10 @@ class BaseInnerDocument(
             by_alias=True,
         )
 
+    def clean_fields(self) -> None:
+        # Fields are already validated by Pydantic.
+        pass
+
 
 class BaseDocument(
     BaseModel,
@@ -551,6 +555,10 @@ class BaseDocument(
             meta["_index"] = index
 
         return meta
+
+    def clean_fields(self) -> None:
+        # Fields are already validated by Pydantic.
+        pass
 
     def index_action(self) -> dict:
         action = self.to_dict(include_meta=True)
