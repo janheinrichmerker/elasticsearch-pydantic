@@ -345,9 +345,13 @@ class _ModelDocumentMeta(ModelMetaclass, DocumentMeta):
             **kwds,
         )
 
+        # Only top-level documents have meta fields (e.g., `_id`), which are not part of the mapping.
+        # In inner documents, fields with the same names are regular source fields.
+        skip_fields = _META_FIELDS if issubclass(new_cls, Document) else frozenset()
+
         # Register mappings based on type hints.
         for key, field_info in new_cls.model_fields.items():
-            if key in _META_FIELDS:
+            if key in skip_fields:
                 continue
             field = _get_type_hint_field(
                 annotation=field_info.annotation,
@@ -359,8 +363,8 @@ class _ModelDocumentMeta(ModelMetaclass, DocumentMeta):
                 mapping.field(key, field)
 
         # Warn about missing Elasticsearch field types.
-        for key, field_info in new_cls.model_fields.items():
-            if key in _META_FIELDS:
+        for key in new_cls.model_fields:
+            if key in skip_fields:
                 continue
             if mapping.resolve_field(key) is None:
                 mro = cls.mro(cls)  # type: ignore
