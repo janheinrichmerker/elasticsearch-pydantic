@@ -655,3 +655,42 @@ def test_mapping_with_union() -> Any:
     actual = _NewDocument
     expected = _OldDocument
     _assert_mapping_equal(actual, expected)
+
+
+class _InnerWithMetaNames(BaseInnerDocument):
+    id: str
+    version: int
+
+
+def test_mapping_inner_document_with_meta_field_names() -> None:
+    mapping = _InnerWithMetaNames._doc_type.mapping
+    assert set(mapping) == {"id", "version"}
+    assert isinstance(mapping["id"], Text)
+    assert isinstance(mapping["version"], Long)
+
+
+def test_mapping_document_with_inner_meta_field_names() -> None:
+    class _Document(BaseDocument):
+        object_field: _InnerWithMetaNames
+        nested_field: List[_InnerWithMetaNames]
+
+        class Index:
+            pass
+
+    mapping = _Document._doc_type.mapping
+    assert isinstance(mapping["object_field"], Object)
+    assert isinstance(mapping["nested_field"], Nested)
+    for key in ("object_field", "nested_field"):
+        assert set(mapping[key]._mapping) == {"id", "version"}
+
+
+def test_mapping_document_excludes_meta_fields() -> None:
+    class _Document(BaseDocument):
+        name: str
+
+        class Index:
+            pass
+
+    mapping = _Document._doc_type.mapping
+    assert set(mapping) == {"name"}
+    assert "id" not in mapping
